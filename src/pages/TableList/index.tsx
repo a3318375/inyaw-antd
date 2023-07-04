@@ -1,4 +1,5 @@
 import { addRule, removeRule, rule, updateRule } from '@/services/ant-design-pro/api';
+import { info1, list9, save8 } from '@/services/ant-design-pro/blogAdmin';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -15,16 +16,17 @@ import { Button, Drawer, Input, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
+import AddBlog from './components/AddBlog';
 
 /**
  * @en-US Add node
  * @zh-CN 添加节点
  * @param fields
  */
-const handleAdd = async (fields: API.RuleListItem) => {
+const handleAdd = async (fields: API.InyaaBlog) => {
   const hide = message.loading('正在添加');
   try {
-    await addRule({ ...fields });
+    await save8({ ...fields });
     hide();
     message.success('Added successfully');
     return true;
@@ -35,28 +37,10 @@ const handleAdd = async (fields: API.RuleListItem) => {
   }
 };
 
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('Configuring');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
+const handleGet = async (id: number) => {
+  const infoResp = await info1({id: id});
+  if (infoResp && infoResp.code === 1) {
 
-    message.success('Configuration is successful');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Configuration failed, please try again!');
-    return false;
   }
 };
 
@@ -88,6 +72,9 @@ const TableList: React.FC = () => {
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
    *  */
+  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [saveTitle, setTitle] = useState<string>('pages.searchTable.createForm.newBlog');
+
   const [createModalOpen, handleModalOpen] = useState<boolean>(false);
   /**
    * @en-US The pop-up window of the distribution update window
@@ -98,7 +85,7 @@ const TableList: React.FC = () => {
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
+  const [currentRow, setCurrentRow] = useState<API.InyaaBlog>();
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   /**
@@ -107,28 +94,13 @@ const TableList: React.FC = () => {
    * */
   const intl = useIntl();
 
-  const columns: ProColumns<API.RuleListItem>[] = [
+  const columns: ProColumns<API.InyaaBlog>[] = [
     {
       title: (
-        <FormattedMessage
-          id="pages.searchTable.updateForm.ruleName.nameLabel"
-          defaultMessage="Rule name"
-        />
+        <FormattedMessage id="pages.searchTable.blog.title" defaultMessage="Rule name" />
       ),
-      dataIndex: 'name',
-      tip: 'The rule name is the unique key',
-      render: (dom, entity) => {
-        return (
-          <a
-            onClick={() => {
-              setCurrentRow(entity);
-              setShowDetail(true);
-            }}
-          >
-            {dom}
-          </a>
-        );
-      },
+      dataIndex: 'title',
+      width: 300,
     },
     {
       title: <FormattedMessage id="pages.searchTable.titleDesc" defaultMessage="Description" />,
@@ -243,7 +215,7 @@ const TableList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.RuleListItem, API.PageParams>
+      <ProTable<API.InyaaBlog, API.PageInyaaBlogVo>
         headerTitle={intl.formatMessage({
           id: 'pages.searchTable.title',
           defaultMessage: 'Enquiry form',
@@ -258,13 +230,41 @@ const TableList: React.FC = () => {
             type="primary"
             key="primary"
             onClick={() => {
-              handleModalOpen(true);
+              setCurrentRow({id: 0});
+              setTitle('pages.searchTable.createForm.newBlog');
+              handleModalVisible(true);
             }}
           >
             <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
-        request={rule}
+        // request={rule}
+        request={async (
+          // 第一个参数 params 查询表单和 params 参数的结合
+          // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
+          params: T & {
+            pageSize: number;
+            current: number;
+          },
+          sort,
+          filter,
+        ) => {
+          // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+          // 如果需要转化参数可以在这里进行修改
+          const resp = await list9({
+            page: params.current,
+            size: params.pageSize,
+          });
+          console.log(111, resp)
+          return {
+            data: resp.data?.content,
+            // success 请返回 true，
+            // 不然 table 会停止解析数据，即使有数据
+            success: resp.code === 1,
+            // 不传会使用 data 的长度，如果是分页一定要传
+            total: resp.data?.totalElements,
+          };
+        }}
         columns={columns}
         rowSelection={{
           onChange: (_, selectedRows) => {
@@ -311,85 +311,40 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
-          defaultMessage: 'New rule',
-        })}
-        width="400px"
-        open={createModalOpen}
-        onOpenChange={handleModalOpen}
+      <AddBlog
+        titleLabel={saveTitle}
+        open={createModalVisible}
+        onOpenChange={handleModalVisible}
+        values={currentRow}
         onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
+          const article: {context: string} = {context: ''}
+          if (value.context) {
+            article.context = value.context;
+            value.article = article;
+          }
+          if (value.type) {
+            value.type = {id: value.type.value, name: value.type.label};
+          }
+          if (value.tagList) {
+            const tags = [];
+            for(const tag of value.tagList) {
+              tags.push({id: tag.value, name: tag.label})
+            }
+            value.tagList = tags;
+          }
+          if(currentRow && currentRow.id !== 0) {
+            value.id = currentRow.id;
+          }
+          console.log(1111, value);
+          const success = await handleAdd(value as API.InyaaBlog);
           if (success) {
-            handleModalOpen(false);
+            handleModalVisible(false);
             if (actionRef.current) {
               actionRef.current.reload();
             }
           }
         }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm>
-      <UpdateForm
-        onSubmit={async (value) => {
-          const success = await handleUpdate(value);
-          if (success) {
-            handleUpdateModalOpen(false);
-            setCurrentRow(undefined);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-        onCancel={() => {
-          handleUpdateModalOpen(false);
-          if (!showDetail) {
-            setCurrentRow(undefined);
-          }
-        }}
-        updateModalOpen={updateModalOpen}
-        values={currentRow || {}}
       />
-
-      <Drawer
-        width={600}
-        open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
-      >
-        {currentRow?.name && (
-          <ProDescriptions<API.RuleListItem>
-            column={2}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}
-          />
-        )}
-      </Drawer>
     </PageContainer>
   );
 };

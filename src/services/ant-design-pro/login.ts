@@ -19,3 +19,14 @@ export async function getFakeCaptcha(
     ...(options || {}),
   });
 }
+
+export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
+  return request<API.LoginResult>('/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
