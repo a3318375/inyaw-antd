@@ -255,7 +255,6 @@ const TableList: React.FC = () => {
             page: params.current,
             size: params.pageSize,
           });
-          console.log(111, resp)
           return {
             data: resp.data?.content,
             // success 请返回 true，
@@ -335,7 +334,6 @@ const TableList: React.FC = () => {
           if(currentRow && currentRow.id !== 0) {
             value.id = currentRow.id;
           }
-          console.log(1111, value);
           const success = await handleAdd(value as API.InyaaBlog);
           if (success) {
             handleModalVisible(false);

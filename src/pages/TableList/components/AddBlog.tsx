@@ -54,7 +54,6 @@ const AddBlog: React.FC<AddBlogProps> = (props) => {
             request={async (params) => {
                 updateText('');
                 const info: API.InyaaBlog = {}
-                console.log(0, props.values)
                 if (props && props.values && props.values.id !== 0) {
                     const infoResp = await info1(params);
 

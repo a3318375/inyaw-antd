@@ -122,7 +122,6 @@ const Login: React.FC = () => {
       }
       // 登录
       const msg = await login({ ...req });
-      console.log(222, msg)
       if (msg.code === 1) {
         if (msg.data) {
           localStorage.setItem('token', msg.data);

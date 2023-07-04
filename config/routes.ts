@@ -52,6 +52,24 @@ export default [
     component: './TableList',
   },
   {
+    name: 'list.tag-list',
+    icon: 'table',
+    path: '/tag',
+    component: './Tag',
+  },
+  {
+    name: 'list.type-list',
+    icon: 'table',
+    path: '/type',
+    component: './Type',
+  },
+  {
+    name: 'list.menu-list',
+    icon: 'table',
+    path: '/menu',
+    component: './Menu',
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },
