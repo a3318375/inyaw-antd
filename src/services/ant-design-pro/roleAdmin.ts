@@ -17,15 +17,13 @@ export async function delete3(body: API.InyaaSysRole, options?: { [key: string]:
 /** 角色列表 GET /role/list */
 export async function list3(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.list3Params,
+  params?: API.list3Params,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResultListInyaaSysRoleVo>('/role/list', {
     method: 'GET',
     params: {
       ...params,
-      role: undefined,
-      ...params['role'],
     },
     ...(options || {}),
   });
@@ -34,6 +32,16 @@ export async function list3(
 /** 新增角色 POST /role/save */
 export async function save3(body: API.InyaaSysRoleVo, options?: { [key: string]: any }) {
   return request<API.BaseResultString>('/role/save', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+export async function saveByMenuIdList(body: API.InyaaSysRoleVo, options?: { [key: string]: any }) {
+  return request<API.BaseResultString>('/role/saveByMenuIdList', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

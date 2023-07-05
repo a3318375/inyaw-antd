@@ -530,6 +530,7 @@ type AuthenticationMethod = {
     sort?: number;
     createTime?: string;
     updateTime?: string;
+    children?: InyaaSysMenuVo[];
   };
 
   type InyaaSysPermission = {
@@ -589,6 +590,7 @@ type AuthenticationMethod = {
     roleName?: string;
     roleKey?: string;
     description?: string;
+    menuIdList?: number[];
     menuList?: number[];
   };
 

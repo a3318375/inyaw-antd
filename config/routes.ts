@@ -12,15 +12,10 @@
  */
 export default [
   {
-    path: '/user',
     layout: false,
-    routes: [
-      {
-        name: 'login',
-        path: '/user/login',
-        component: './User/Login',
-      },
-    ],
+    name: 'login',
+    path: '/login',
+    component: './Login',
   },
   {
     path: '/welcome',
@@ -68,6 +63,18 @@ export default [
     icon: 'table',
     path: '/menu',
     component: './Menu',
+  },
+  {
+    name: 'list.user-list',
+    icon: 'table',
+    path: '/user',
+    component: './User',
+  },
+  {
+    name: 'list.role-list',
+    icon: 'table',
+    path: '/role',
+    component: './Role',
   },
   {
     path: '/',

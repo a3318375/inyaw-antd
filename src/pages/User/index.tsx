@@ -1,24 +1,24 @@
-import {PlusOutlined} from '@ant-design/icons';
-import type {ActionType, ProColumns} from '@ant-design/pro-components';
-import {findMenuList1, save5, delete5} from '@/services/ant-design-pro/menuAdmin';
+import { list, save, deleteUser } from '@/services/ant-design-pro/userAdmin';
+import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
   PageContainer,
   ProTable,
 } from '@ant-design/pro-components';
-import {FormattedMessage, useIntl} from '@umijs/max';
-import {Button, message} from 'antd';
-import React, {useRef, useState} from 'react';
-import AddForm from './components/AddForm';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import { Button, message } from 'antd';
+import React, { useRef, useState } from 'react';
+import AddBlog from './components/AddForm';
 
 /**
  * @en-US Add node
  * @zh-CN 添加节点
  * @param fields
  */
-const handleAdd = async (fields: API.InyaaSysMenu) => {
+const handleAdd = async (fields: API.InyaaSysUser) => {
   const hide = message.loading('正在添加');
   try {
-    await save5({...fields});
+    await save({ ...fields });
     hide();
     message.success('Added successfully');
     return true;
@@ -35,11 +35,11 @@ const handleAdd = async (fields: API.InyaaSysMenu) => {
  *
  * @param selectedRows
  */
-const handleRemove = async (selectedRows: API.InyaaSysMenu) => {
+const handleRemove = async (selectedRows: API.InyaaSysUser) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    await delete5({...selectedRows});
+    await deleteUser({ ...selectedRows });
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -50,7 +50,7 @@ const handleRemove = async (selectedRows: API.InyaaSysMenu) => {
   }
 };
 
-const MenuList: React.FC = () => {
+const UserList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
@@ -66,29 +66,43 @@ const MenuList: React.FC = () => {
    * */
   const intl = useIntl();
 
-  const columns: ProColumns<API.InyaaBlogType>[] = [
+  const columns: ProColumns<API.InyaaSysUser>[] = [
     {
-      title: '菜单名称',
-      width: 120,
-      dataIndex: 'name',
+      title: "用户名",
+      dataIndex: ['inyawSysUserDetail','name'],
     },
     {
-      title: '菜单路径',
-      width: 120,
-      dataIndex: 'path',
+      title: "账号",
+      dataIndex: 'username',
+      valueType: 'textarea',
     },
     {
-      title: '菜单图标',
-      width: 120,
-      dataIndex: 'icon',
+      title: "角色",
+      dataIndex: 'roleList',
+      valueType: 'textarea',
     },
     {
-      title: '组件路径',
-      width: 120,
-      dataIndex: 'component',
+      title: "邮箱",
+      dataIndex: ['inyawSysUserDetail','email'],
+      valueType: 'textarea',
     },
     {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating"/>,
+      title: "最后登录ip",
+      dataIndex: ['inyawSysUserDetail','loginIp'],
+      valueType: 'textarea',
+    },
+    {
+      title: "最后登录时间",
+      dataIndex: ['inyawSysUserDetail','loginDate'],
+      valueType: 'textarea',
+    },
+    {
+      title: "账号是否未锁定",
+      dataIndex: 'accountNonLocked',
+      valueType: 'textarea',
+    },
+    {
+      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -99,7 +113,7 @@ const MenuList: React.FC = () => {
             handleModalVisible(true);
           }}
         >
-          <FormattedMessage id="pages.searchTable.type.updateButton" defaultMessage="Configuration"/>
+          <FormattedMessage id="pages.searchTable.tag.updateButton" defaultMessage="Configuration" />
         </a>,
         <a key="delete"
            onClick={() => {
@@ -107,7 +121,7 @@ const MenuList: React.FC = () => {
            }}
         >
           <FormattedMessage
-            id="pages.searchTable.type.deleteButton"
+            id="pages.searchTable.tag.deleteButton"
             defaultMessage="Subscribe to alerts"
           />
         </a>,
@@ -117,22 +131,16 @@ const MenuList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.InyaaSysMenuVo>
-        columns={columns}
-        request={async (params, sorter, filter) => {
-          // 表单搜索项会从 params 传入，传递给后端接口。
-          console.log(params, sorter, filter);
-          const data = await findMenuList1();
-          return Promise.resolve({
-            data: data.data,
-            success: true,
-          });
+      <ProTable<API.InyaaSysUser>
+        headerTitle={intl.formatMessage({
+          id: 'pages.searchTable.title',
+          defaultMessage: 'Enquiry form',
+        })}
+        actionRef={actionRef}
+        rowKey="key"
+        search={{
+          labelWidth: 120,
         }}
-        rowKey="id"
-        pagination={false}
-        search={false}
-        dateFormatter="string"
-        headerTitle="嵌套表格"
         toolBarRender={() => [
           <Button
             type="primary"
@@ -142,11 +150,24 @@ const MenuList: React.FC = () => {
               handleModalVisible(true);
             }}
           >
-            <PlusOutlined/> <FormattedMessage id="pages.searchTable.new" defaultMessage="New"/>
+            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
+        // request={rule}
+        request={async () => {
+          // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+          // 如果需要转化参数可以在这里进行修改
+          const resp = await list();
+          return {
+            data: resp.data,
+            // success 请返回 true，
+            // 不然 table 会停止解析数据，即使有数据
+            success: resp.code === 1,
+          };
+        }}
+        columns={columns}
       />
-      <AddForm
+      <AddBlog
         titleLabel={saveTitle}
         open={createModalVisible}
         onOpenChange={handleModalVisible}
@@ -166,4 +187,4 @@ const MenuList: React.FC = () => {
   );
 };
 
-export default MenuList;
+export default UserList;

@@ -52,4 +52,6 @@ export default {
   'menu.list.tag-list': '标签列表',
   'menu.list.type-list': '分类列表',
   'menu.list.menu-list': '菜单列表',
+  'menu.list.user-list': '账号列表',
+  'menu.list.role-list': '角色列表',
 };

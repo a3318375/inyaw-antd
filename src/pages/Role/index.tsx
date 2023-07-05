@@ -1,13 +1,13 @@
-import {PlusOutlined} from '@ant-design/icons';
-import type {ActionType, ProColumns} from '@ant-design/pro-components';
-import {findMenuList1, save5, delete5} from '@/services/ant-design-pro/menuAdmin';
+import { list3, saveByMenuIdList, delete3 } from '@/services/ant-design-pro/roleAdmin';
+import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
   PageContainer,
   ProTable,
 } from '@ant-design/pro-components';
-import {FormattedMessage, useIntl} from '@umijs/max';
-import {Button, message} from 'antd';
-import React, {useRef, useState} from 'react';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import { Button, message } from 'antd';
+import React, { useRef, useState } from 'react';
 import AddForm from './components/AddForm';
 
 /**
@@ -15,10 +15,10 @@ import AddForm from './components/AddForm';
  * @zh-CN 添加节点
  * @param fields
  */
-const handleAdd = async (fields: API.InyaaSysMenu) => {
+const handleAdd = async (fields: API.InyaaSysRole) => {
   const hide = message.loading('正在添加');
   try {
-    await save5({...fields});
+    await saveByMenuIdList({ ...fields });
     hide();
     message.success('Added successfully');
     return true;
@@ -35,11 +35,11 @@ const handleAdd = async (fields: API.InyaaSysMenu) => {
  *
  * @param selectedRows
  */
-const handleRemove = async (selectedRows: API.InyaaSysMenu) => {
+const handleRemove = async (selectedRows: API.InyaaSysRole) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    await delete5({...selectedRows});
+    await delete3({ ...selectedRows });
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -50,7 +50,7 @@ const handleRemove = async (selectedRows: API.InyaaSysMenu) => {
   }
 };
 
-const MenuList: React.FC = () => {
+const TypeList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
@@ -58,7 +58,7 @@ const MenuList: React.FC = () => {
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [saveTitle, setTitle] = useState<string>('pages.searchTable.createForm.newBlog');
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<API.InyaaBlog>();
+  const [currentRow, setCurrentRow] = useState<API.InyaaSysRoleVo>();
 
   /**
    * @en-US International configuration
@@ -66,40 +66,43 @@ const MenuList: React.FC = () => {
    * */
   const intl = useIntl();
 
-  const columns: ProColumns<API.InyaaBlogType>[] = [
+  const columns: ProColumns<API.InyaaSysRoleVo>[] = [
     {
-      title: '菜单名称',
-      width: 120,
-      dataIndex: 'name',
+      title: "角色名称",
+      dataIndex: 'roleName',
     },
     {
-      title: '菜单路径',
-      width: 120,
-      dataIndex: 'path',
+      title: "权限代码",
+      dataIndex: 'roleKey',
+      valueType: 'textarea',
     },
     {
-      title: '菜单图标',
-      width: 120,
-      dataIndex: 'icon',
+      sorter: true,
+      title: "描述",
+      dataIndex: 'description',
+      valueType: 'dateTime',
     },
     {
-      title: '组件路径',
-      width: 120,
-      dataIndex: 'component',
-    },
-    {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating"/>,
+      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
         <a
           key="update"
           onClick={() => {
+            const idList = [];
+            if (record.menuList) {
+              record.menuList.forEach(item => {
+                idList.push(item.id);
+              });
+              record.menuList = idList;
+            }
+            console.log(1145, record)
             setCurrentRow(record);
             handleModalVisible(true);
           }}
         >
-          <FormattedMessage id="pages.searchTable.type.updateButton" defaultMessage="Configuration"/>
+          <FormattedMessage id="pages.searchTable.type.updateButton" defaultMessage="Configuration" />
         </a>,
         <a key="delete"
            onClick={() => {
@@ -117,22 +120,16 @@ const MenuList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.InyaaSysMenuVo>
-        columns={columns}
-        request={async (params, sorter, filter) => {
-          // 表单搜索项会从 params 传入，传递给后端接口。
-          console.log(params, sorter, filter);
-          const data = await findMenuList1();
-          return Promise.resolve({
-            data: data.data,
-            success: true,
-          });
+      <ProTable<API.InyaaSysRoleVo>
+        headerTitle={intl.formatMessage({
+          id: 'pages.searchTable.title',
+          defaultMessage: 'Enquiry form',
+        })}
+        actionRef={actionRef}
+        rowKey="key"
+        search={{
+          labelWidth: 120,
         }}
-        rowKey="id"
-        pagination={false}
-        search={false}
-        dateFormatter="string"
-        headerTitle="嵌套表格"
         toolBarRender={() => [
           <Button
             type="primary"
@@ -142,9 +139,22 @@ const MenuList: React.FC = () => {
               handleModalVisible(true);
             }}
           >
-            <PlusOutlined/> <FormattedMessage id="pages.searchTable.new" defaultMessage="New"/>
+            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
+        // request={rule}
+        request={async () => {
+          // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+          // 如果需要转化参数可以在这里进行修改
+          const resp = await list3();
+          return {
+            data: resp.data,
+            // success 请返回 true，
+            // 不然 table 会停止解析数据，即使有数据
+            success: resp.code === 1,
+          };
+        }}
+        columns={columns}
       />
       <AddForm
         titleLabel={saveTitle}
@@ -152,8 +162,10 @@ const MenuList: React.FC = () => {
         onOpenChange={handleModalVisible}
         values={currentRow}
         onFinish={async (value) => {
+          value.menuIdList = value.menuList;
+          delete value.menuList;
           console.log(1111, value);
-          const success = await handleAdd(value as API.InyaaBlog);
+          const success = await handleAdd(value as API.InyaaSysRole);
           if (success) {
             handleModalVisible(false);
             if (actionRef.current) {
@@ -166,4 +178,4 @@ const MenuList: React.FC = () => {
   );
 };
 
-export default MenuList;
+export default TypeList;
