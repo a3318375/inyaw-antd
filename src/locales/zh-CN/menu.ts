@@ -50,6 +50,7 @@ export default {
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
   'menu.list.tag-list': '标签列表',
+  'menu.list.blog-list': '博客列表',
   'menu.list.type-list': '分类列表',
   'menu.list.menu-list': '菜单列表',
   'menu.list.user-list': '账号列表',

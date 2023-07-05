@@ -41,10 +41,10 @@ export default [
     ],
   },
   {
-    name: 'list.table-list',
+    name: 'list.blog-list',
     icon: 'table',
-    path: '/list',
-    component: './TableList',
+    path: '/blog',
+    component: './Blog',
   },
   {
     name: 'list.tag-list',

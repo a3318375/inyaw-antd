@@ -358,6 +358,31 @@ type AuthenticationMethod = {
     context?: string;
   };
 
+  type InyaaBlogAdd = {
+    id?: number;
+    /** 文章标题 */
+    title?: string;
+    cover?: string;
+    comments?: number;
+    /** 发布状态 */
+    status?: boolean;
+    summary?: string;
+    views?: number;
+    /** 创建时间 */
+    createTime?: string;
+    /** 更新时间 */
+    updateTime?: string;
+    /** 作者 */
+    userId?: number;
+    isComment?: boolean;
+    /** 是否热门 */
+    isHot?: boolean;
+    type?: SelectType;
+    tagList?: SelectType[];
+    article?: InyaaBlogArticle;
+    commentList?: InyaaBlogComment[];
+  };
+
   type InyaaBlogArticle = {
     id?: number;
     context?: string;
@@ -429,6 +454,7 @@ type AuthenticationMethod = {
   type SelectType = {
     value?: number;
     label?: string;
+    obj?: any;
   };
 
   type InyaaBlogVo = {
@@ -693,8 +719,8 @@ type AuthenticationMethod = {
     'nextBlog.article.id'?: number;
     'nextBlog.article.context'?: string;
     'nextBlog.commentList'?: InyaaBlogComment[];
-    page?: string;
-    size?: string;
+    page?: number;
+    size?: number;
     id?: number;
     title?: string;
     cover?: string;
