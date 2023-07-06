@@ -1,13 +1,10 @@
-import {list9, save8, delete8} from '@/services/ant-design-pro/blogAdmin';
-import {PlusOutlined} from '@ant-design/icons';
-import type {ActionType, ProColumns} from '@ant-design/pro-components';
-import {
-  PageContainer,
-  ProTable,
-} from '@ant-design/pro-components';
-import {FormattedMessage, useIntl} from '@umijs/max';
-import {Button, message} from 'antd';
-import React, {useRef, useState} from 'react';
+import { delete8, list9, save8 } from '@/services/ant-design-pro/blogAdmin';
+import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import { Button, message } from 'antd';
+import React, { useRef, useState } from 'react';
 import AddForm from './components/AddForm';
 
 /**
@@ -18,7 +15,7 @@ import AddForm from './components/AddForm';
 const handleAdd = async (fields: API.InyaaBlog) => {
   const hide = message.loading('正在添加');
   try {
-    await save8({...fields});
+    await save8({ ...fields });
     hide();
     message.success('Added successfully');
     return true;
@@ -39,7 +36,7 @@ const handleRemove = async (selectedRows: API.InyaaBlog) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    await delete8({...selectedRows});
+    await delete8({ ...selectedRows });
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -49,7 +46,6 @@ const handleRemove = async (selectedRows: API.InyaaBlog) => {
     return false;
   }
 };
-
 
 const BlogList: React.FC = () => {
   /**
@@ -78,8 +74,8 @@ const BlogList: React.FC = () => {
       width: 140,
       dataIndex: 'status',
       valueEnum: {
-        true: {text: '发布', status: 'Processing'},
-        false: {text: '草稿', status: 'Success'},
+        true: { text: '发布', status: 'Processing' },
+        false: { text: '草稿', status: 'Success' },
       },
     },
     {
@@ -100,7 +96,7 @@ const BlogList: React.FC = () => {
       valueType: 'date',
     },
     {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating"/>,
+      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -112,12 +108,16 @@ const BlogList: React.FC = () => {
             handleModalVisible(true);
           }}
         >
-          <FormattedMessage id="pages.searchTable.tag.updateButton" defaultMessage="Configuration"/>
+          <FormattedMessage
+            id="pages.searchTable.tag.updateButton"
+            defaultMessage="Configuration"
+          />
         </a>,
-        <a key="delete"
-           onClick={() => {
-             handleRemove(record);
-           }}
+        <a
+          key="delete"
+          onClick={() => {
+            handleRemove(record);
+          }}
         >
           <FormattedMessage
             id="pages.searchTable.tag.deleteButton"
@@ -146,11 +146,11 @@ const BlogList: React.FC = () => {
             key="primary"
             onClick={() => {
               setTitle('pages.searchTable.createForm.newBlog');
-              setCurrentRow({id: 0});
+              setCurrentRow({ id: 0 });
               handleModalVisible(true);
             }}
           >
-            <PlusOutlined/> <FormattedMessage id="pages.searchTable.new" defaultMessage="New"/>
+            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
         // request={rule}
@@ -202,13 +202,13 @@ const BlogList: React.FC = () => {
             delete value.type;
           }
           console.log(114514, value);
-          // const success = await handleAdd(value as API.InyaaBlog);
-          // if (success) {
-          //   handleModalVisible(false);
-          //   if (actionRef.current) {
-          //     actionRef.current.reload();
-          //   }
-          // }
+          const success = await handleAdd(value as API.InyaaBlog);
+          if (success) {
+            handleModalVisible(false);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
         }}
       />
     </PageContainer>
